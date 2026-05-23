@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+/* ─── Design Tokens ─── */
+:root {
+  /* Default to dark theme if no data-theme is set */
+  --bg-base:      #0A0A0F;
+  --bg-surface:   #13131A;
+  --bg-border:    #1E1E2E;
+  --primary:      #6C63FF;
+  --primary-hover:#5A52E0;
+  --accent:       #00D4AA;
+  --text-primary: #F0F0F8;
+  --text-secondary:#8888AA;
+  --danger:       #FF5470;
+  --warning:      #FFB547;
+}
+
+[data-theme='dark'] {
+  --bg-base:      #0A0A0F;
+  --bg-surface:   #13131A;
+  --bg-border:    #1E1E2E;
+  --primary:      #6C63FF;
+  --primary-hover:#5A52E0;
+  --accent:       #00D4AA;
+  --text-primary: #F0F0F8;
+  --text-secondary:#8888AA;
+  --danger:       #FF5470;
+  --warning:      #FFB547;
+}
+
+[data-theme='light'] {
+  --bg-base:      #F8F9FA;
+  --bg-surface:   #FFFFFF;
+  --bg-border:    #E9ECEF;
+  --primary:      #6C63FF;
+  --primary-hover:#5A52E0;
+  --accent:       #00B894;
+  --text-primary: #1A1A24;
+  --text-secondary:#6B7280;
+  --danger:       #EF4444;
+  --warning:      #F59E0B;
+}
+
+/* ─── Base ─── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+code, pre, kbd, samp {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ─── Custom Scrollbar ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--bg-border);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--bg-border);
+  border-radius: 10px;
+}
+
+/* ─── Focus visible ─── */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ─── Selection ─── */
+::selection {
+  background-color: rgba(108, 99, 255, 0.3);
+  color: var(--text-primary);
+}
+
+/* ─── Animations ─── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #1E1E2E 25%, #252535 50%, #1E1E2E 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+/* ─── Glow effects ─── */
+.glow-primary { box-shadow: 0 0 20px rgba(108, 99, 255, 0.3); }
+.glow-accent  { box-shadow: 0 0 20px rgba(0, 212, 170, 0.3);  }
+
+/* ─── Glass effect ─── */
+.glass {
+  background: rgba(19, 19, 26, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(30, 30, 46, 0.8);
+}
+
+/* ─── Gradient text ─── */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Input range accent ─── */
+input[type="range"] { accent-color: var(--primary); }
+
+/* ─── Select styling ─── */
+select option {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+}
