@@ -3,12 +3,21 @@
 import { motion } from 'framer-motion';
 import { Trophy, Target, Clock, RotateCcw, Eye, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { QuizResult as QuizResultType } from '@/types/quiz';
+/** Type local pour les résultats calculés côté client */
+interface QuizResultData {
+  quizId: string;
+  score: number;
+  totalQuestions: number;
+  correctAnswers: number;
+  wrongAnswers: number;
+  duration: number;
+  recommendations: string[];
+}
 import { formatDuration } from '@/lib/utils';
 import { ROUTES } from '@/constants/routes';
 
 interface QuizResultProps {
-  result: QuizResultType;
+  result: QuizResultData;
   onRetry?: () => void;
   onReviewErrors?: () => void;
 }

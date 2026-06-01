@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, X, FileText, Settings2 } from 'lucide-react';
-import { GenerateQuizOptions, QuizDifficulty, QuizType } from '@/types/quiz';
+import { QuizCreateRequest, QuizDifficulty, QuizType } from '@/types/quiz';
 import { Document } from '@/types/document';
 
 interface QuizGeneratorProps {
   documents: Document[];
-  onGenerate: (options: GenerateQuizOptions) => void;
+  onGenerate: (options: QuizCreateRequest) => void;
   isGenerating: boolean;
   isOpen: boolean;
   onClose: () => void;
@@ -25,7 +25,7 @@ const QuizGenerator = ({ documents, onGenerate, isGenerating, isOpen, onClose }:
 
   const handleGenerate = () => {
     if (!documentId) return;
-    onGenerate({ documentId, type, difficulty, questionCount });
+    onGenerate({ document_id: documentId, quiz_type: type, difficulty, num_questions: questionCount });
   };
 
   const difficultyOptions = [

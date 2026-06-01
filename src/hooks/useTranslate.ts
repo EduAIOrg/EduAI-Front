@@ -7,59 +7,54 @@ import { TranslateRequest, TranslateResponse, TranslationHistory } from '@/types
 
 /**
  * Hook pour le service de traduction FR/EN.
- * Inclut un debounce de 500ms et gère l'historique local.
+ * Endpoint: POST /api/translate/
  */
 export const useTranslate = () => {
   const [history, setHistory] = useState<TranslationHistory[]>([]);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  /** Mutation de traduction */
   const translateMutation = useMutation({
     mutationFn: async (request: TranslateRequest): Promise<TranslateResponse> => {
-      const { data } = await api.post('/api/translate', request);
-      return data.data;
+      const { data } = await api.post('/api/translate/', {
+        text: request.text,
+        source_lang: request.source_lang,
+        target_lang: request.target_lang,
+        preserve_pedagogical_context: request.preserve_pedagogical_context ?? true,
+      });
+      return data;
     },
     onSuccess: (result, variables) => {
       const entry: TranslationHistory = {
         id: crypto.randomUUID(),
         sourceText: variables.text,
-        translatedText: result.translatedText,
-        from: variables.from,
-        to: variables.to,
+        translatedText: result.translated_text,
+        from: variables.source_lang,
+        to: variables.target_lang,
         createdAt: new Date().toISOString(),
       };
       setHistory((prev) => [entry, ...prev].slice(0, 10));
     },
   });
 
-  /** Traduit avec debounce de 500ms */
   const translateDebounced = useCallback(
     (request: TranslateRequest) => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
-
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
       debounceTimer.current = setTimeout(() => {
-        if (request.text.trim().length > 0) {
-          translateMutation.mutate(request);
-        }
+        if (request.text.trim().length > 0) translateMutation.mutate(request);
       }, 500);
     },
     [translateMutation]
   );
 
-  /** Traduit immédiatement (sans debounce) */
   const translateImmediate = useCallback(
-    (request: TranslateRequest) => {
-      translateMutation.mutate(request);
-    },
+    (request: TranslateRequest) => { translateMutation.mutate(request); },
     [translateMutation]
   );
 
   return {
     translate: translateDebounced,
     translateImmediate,
-    translatedText: translateMutation.data?.translatedText ?? '',
+    translatedText: translateMutation.data?.translated_text ?? '',
     isTranslating: translateMutation.isPending,
     history,
     clearHistory: () => setHistory([]),

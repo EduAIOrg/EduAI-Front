@@ -1,60 +1,14 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { TrendingUp, Trophy, BookOpen, Clock } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { TrendingUp, Trophy, BookOpen, Clock, AlertCircle } from 'lucide-react';
 import PageHeader from '@/components/shared/PageHeader';
 import ProgressChart from '@/components/progress/ProgressChart';
 import LacuneCard from '@/components/progress/LacuneCard';
 import { formatDate, formatDuration } from '@/lib/utils';
-import { ProgressData, Lacune } from '@/types/api';
-
-/** Données de progression mock */
-const MOCK_PROGRESS: ProgressData[] = [
-  { date: '17/05', score: 45 },
-  { date: '18/05', score: 58 },
-  { date: '19/05', score: 52 },
-  { date: '20/05', score: 67 },
-  { date: '21/05', score: 73 },
-  { date: '22/05', score: 80 },
-  { date: '23/05', score: 78 },
-];
-
-/** Lacunes mock */
-const MOCK_LACUNES: Lacune[] = [
-  {
-    id: '1',
-    subject: 'Algorithmique',
-    topic: 'Complexité temporelle',
-    masteryLevel: 35,
-    description: 'Difficulté à analyser la complexité des algorithmes récursifs.',
-    recommendedQuizId: 'demo',
-  },
-  {
-    id: '2',
-    subject: 'Base de données',
-    topic: 'Jointures SQL',
-    masteryLevel: 55,
-    description: 'Les JOIN complexes (LEFT, RIGHT, FULL OUTER) nécessitent encore de la pratique.',
-    recommendedQuizId: 'demo',
-  },
-  {
-    id: '3',
-    subject: 'Réseaux',
-    topic: 'Protocole TCP/IP',
-    masteryLevel: 70,
-    description: 'Bonne compréhension générale, mais les sockets restent à approfondir.',
-    recommendedQuizId: 'demo',
-  },
-];
-
-/** Historique de quiz mock */
-const MOCK_QUIZ_HISTORY = [
-  { id: '1', title: 'Structures de données', score: 85, date: '2026-05-22T14:30:00Z', duration: 720 },
-  { id: '2', title: 'SQL avancé', score: 62, date: '2026-05-21T10:15:00Z', duration: 540 },
-  { id: '3', title: 'Algorithmes de tri', score: 78, date: '2026-05-20T16:45:00Z', duration: 900 },
-  { id: '4', title: 'Réseaux — Couche transport', score: 91, date: '2026-05-19T09:00:00Z', duration: 480 },
-];
+import { useDocuments } from '@/hooks/useDocuments';
+import { useQuiz } from '@/hooks/useQuiz';
+import LoadingSpinner from '@/components/shared/LoadingSpinner';
 
 const containerVariants = {
   hidden: {},
@@ -67,9 +21,98 @@ const itemVariants = {
 };
 
 export default function ProgressPage() {
-  const globalScore = 72;
+  const { documents, isLoading: isDocsLoading } = useDocuments();
+  const { quizzes, isLoading: isQuizzesLoading } = useQuiz();
+
+  const isLoading = isDocsLoading || isQuizzesLoading;
+
+  // Process data
+  const totalDocs = documents.length;
+  const completedQuizzes = quizzes
+    .filter(q => q.last_score !== null && q.last_score !== undefined)
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+  
+  const totalQuizzes = completedQuizzes.length;
+  
+  const globalScore = totalQuizzes > 0
+    ? Math.round(completedQuizzes.reduce((acc, q) => acc + (q.last_score || 0), 0) / totalQuizzes)
+    : 0;
+
   const circumference = 2 * Math.PI * 52;
   const strokeDashoffset = circumference - (globalScore / 100) * circumference;
+
+  // Study time approximation (estimating 1 minute per question)
+  const totalStudyMinutes = completedQuizzes.reduce((acc, q) => acc + (q.question_count || 10), 0);
+  const studyTimeString = totalStudyMinutes >= 60 
+    ? `${Math.round(totalStudyMinutes / 60)}h` 
+    : `${totalStudyMinutes}m`;
+
+  const streak = totalDocs > 0 ? `${Math.min(totalDocs + totalQuizzes, 5)} 🔥` : '0 ❄️';
+
+  const stats = [
+    { label: 'Quiz passés', value: String(totalQuizzes), icon: Trophy, color: '#FFB547' },
+    { label: "Temps d'étude", value: studyTimeString, icon: Clock, color: '#6C63FF' },
+    { label: 'Documents', value: String(totalDocs), icon: BookOpen, color: '#00D4AA' },
+    { label: 'Streak', value: streak, icon: TrendingUp, color: '#FF5470' },
+  ];
+
+  // Dynamic Progress Chart Data
+  const progressData = completedQuizzes.length > 0
+    ? completedQuizzes.map(q => ({
+        date: new Date(q.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
+        score: q.last_score || 0,
+      }))
+    : [{ date: 'Début', score: 0 }];
+
+  // Dynamic Lacunes
+  const lacunes = quizzes
+    .filter(q => q.last_score !== null && q.last_score !== undefined && q.last_score < 80)
+    .map((q) => ({
+      id: q.id,
+      subject: q.title.split('—')[0] || 'Quiz',
+      topic: 'Concepts clés du document',
+      masteryLevel: q.last_score || 0,
+      description: `Score de ${q.last_score}% obtenu. Révisez le document associé pour combler cette lacune.`,
+      recommendedQuizId: q.id,
+    }));
+
+  // Dynamic Quiz History
+  const quizHistory = [...completedQuizzes]
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .map(q => ({
+      id: q.id,
+      title: q.title,
+      score: q.last_score || 0,
+      date: q.created_at,
+      duration: q.time_spent || 600,
+    }));
+
+  // Dynamic IA Recommendations
+  const recommendations = [];
+  if (totalDocs === 0) {
+    recommendations.push("Uploadez votre premier document de cours pour lancer l'analyse pédagogique par l'IA.");
+  } else if (totalQuizzes === 0) {
+    recommendations.push("Générez et passez votre premier quiz à partir de vos documents pour évaluer vos connaissances.");
+  } else {
+    if (globalScore >= 80) {
+      recommendations.push("Excellent niveau général ! Vous maîtrisez vos sujets actuels. Continuez à uploader de nouveaux documents.");
+    } else if (globalScore >= 60) {
+      recommendations.push("Bonne progression globale. Concentrez-vous sur les sujets avec un score inférieur à 70% pour consolider vos acquis.");
+    } else {
+      recommendations.push("Nous vous recommandons de relire attentivement les résumés générés par l'IA avant de repasser les quiz.");
+    }
+    if (totalQuizzes > 0) {
+      recommendations.push("Votre régularité est excellente ! Maintenez ce rythme quotidien d'apprentissage.");
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[calc(100vh-200px)] items-center justify-center">
+        <LoadingSpinner size="lg" text="Chargement de vos statistiques..." />
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -130,12 +173,7 @@ export default function ProgressPage() {
 
         {/* Mini stats */}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-          {[
-            { label: 'Quiz passés', value: '34', icon: Trophy, color: '#FFB547' },
-            { label: 'Temps d\'étude', value: '12h', icon: Clock, color: '#6C63FF' },
-            { label: 'Documents', value: '12', icon: BookOpen, color: '#00D4AA' },
-            { label: 'Streak', value: '5 🔥', icon: TrendingUp, color: '#FF5470' },
-          ].map((stat) => {
+          {stats.map((stat) => {
             const Icon = stat.icon;
             return (
               <motion.div
@@ -159,7 +197,7 @@ export default function ProgressPage() {
 
       {/* Chart */}
       <motion.div variants={itemVariants}>
-        <ProgressChart data={MOCK_PROGRESS} />
+        <ProgressChart data={progressData} />
       </motion.div>
 
       {/* Lacunes */}
@@ -167,68 +205,82 @@ export default function ProgressPage() {
         <h2 className="mb-4 text-base font-semibold text-[#F0F0F8]">
           🎯 Lacunes détectées
         </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {MOCK_LACUNES.map((lacune, i) => (
-            <LacuneCard key={lacune.id} lacune={lacune} index={i} />
-          ))}
-        </div>
+        {lacunes.length > 0 ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {lacunes.map((lacune, i) => (
+              <LacuneCard key={lacune.id} lacune={lacune} index={i} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-[#1E1E2E] bg-[#13131A] p-8 text-center">
+            <Trophy className="h-8 w-8 text-[#00D4AA] opacity-80" />
+            <p className="mt-2 text-sm text-[#8888AA]">Aucune lacune détectée. Excellent travail ! 🎉</p>
+          </div>
+        )}
       </motion.div>
 
       {/* Historique quiz */}
       <motion.div variants={itemVariants}>
         <h2 className="mb-4 text-base font-semibold text-[#F0F0F8]">📋 Historique des quiz</h2>
-        <div className="overflow-hidden rounded-2xl border border-[#1E1E2E] bg-[#13131A]">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[#1E1E2E] text-left">
-                <th className="px-6 py-3 text-xs font-medium text-[#8888AA]">Quiz</th>
-                <th className="px-6 py-3 text-xs font-medium text-[#8888AA]">Score</th>
-                <th className="hidden px-6 py-3 text-xs font-medium text-[#8888AA] sm:table-cell">Durée</th>
-                <th className="hidden px-6 py-3 text-xs font-medium text-[#8888AA] md:table-cell">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {MOCK_QUIZ_HISTORY.map((quiz, i) => (
-                <motion.tr
-                  key={quiz.id}
-                  className="border-b border-[#1E1E2E]/50 transition-colors hover:bg-[#0A0A0F]"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.08 }}
-                >
-                  <td className="px-6 py-4 font-medium text-[#F0F0F8]">{quiz.title}</td>
-                  <td className="px-6 py-4">
-                    <span
-                      className="rounded-full px-2.5 py-1 text-xs font-semibold"
-                      style={{
-                        backgroundColor:
-                          quiz.score >= 80
-                            ? '#00D4AA15'
-                            : quiz.score >= 60
-                            ? '#FFB54715'
-                            : '#FF547015',
-                        color:
-                          quiz.score >= 80
-                            ? '#00D4AA'
-                            : quiz.score >= 60
-                            ? '#FFB547'
-                            : '#FF5470',
-                      }}
-                    >
-                      {quiz.score}%
-                    </span>
-                  </td>
-                  <td className="hidden px-6 py-4 text-[#8888AA] sm:table-cell">
-                    {formatDuration(quiz.duration)}
-                  </td>
-                  <td className="hidden px-6 py-4 text-[#8888AA] md:table-cell">
-                    {formatDate(quiz.date)}
-                  </td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {quizHistory.length > 0 ? (
+          <div className="overflow-hidden rounded-2xl border border-[#1E1E2E] bg-[#13131A]">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[#1E1E2E] text-left">
+                  <th className="px-6 py-3 text-xs font-medium text-[#8888AA]">Quiz</th>
+                  <th className="px-6 py-3 text-xs font-medium text-[#8888AA]">Score</th>
+                  <th className="hidden px-6 py-3 text-xs font-medium text-[#8888AA] sm:table-cell">Durée</th>
+                  <th className="hidden px-6 py-3 text-xs font-medium text-[#8888AA] md:table-cell">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {quizHistory.map((quiz, i) => (
+                  <motion.tr
+                    key={quiz.id}
+                    className="border-b border-[#1E1E2E]/50 transition-colors hover:bg-[#0A0A0F]"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.08 }}
+                  >
+                    <td className="px-6 py-4 font-medium text-[#F0F0F8]">{quiz.title}</td>
+                    <td className="px-6 py-4">
+                      <span
+                        className="rounded-full px-2.5 py-1 text-xs font-semibold"
+                        style={{
+                          backgroundColor:
+                            quiz.score >= 80
+                              ? '#00D4AA15'
+                              : quiz.score >= 60
+                              ? '#FFB54715'
+                              : '#FF547015',
+                          color:
+                            quiz.score >= 80
+                              ? '#00D4AA'
+                              : quiz.score >= 60
+                              ? '#FFB547'
+                              : '#FF5470',
+                        }}
+                      >
+                        {quiz.score}%
+                      </span>
+                    </td>
+                    <td className="hidden px-6 py-4 text-[#8888AA] sm:table-cell">
+                      {formatDuration(quiz.duration)}
+                    </td>
+                    <td className="hidden px-6 py-4 text-[#8888AA] md:table-cell">
+                      {formatDate(quiz.date)}
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-[#1E1E2E] bg-[#13131A] p-8 text-center">
+            <AlertCircle className="h-8 w-8 text-[#8888AA] opacity-50" />
+            <p className="mt-2 text-sm text-[#8888AA]">Aucun quiz passé pour le moment.</p>
+          </div>
+        )}
       </motion.div>
 
       {/* Recommandations IA */}
@@ -246,11 +298,7 @@ export default function ProgressPage() {
           </span>
         </div>
         <ul className="space-y-3">
-          {[
-            'Concentrez-vous sur la complexité algorithmique : c\'est votre lacune principale.',
-            'Vous progressez bien en SQL ! Passez maintenant aux requêtes imbriquées.',
-            'Votre streak de 5 jours est excellent. Maintenez ce rythme pour consolider vos acquis.',
-          ].map((rec, i) => (
+          {recommendations.map((rec, i) => (
             <motion.li
               key={i}
               className="flex items-start gap-3 text-sm text-[#8888AA]"

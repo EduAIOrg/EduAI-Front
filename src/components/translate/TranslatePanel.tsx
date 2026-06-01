@@ -30,7 +30,7 @@ const TranslatePanel = () => {
   const handleSourceChange = (text: string) => {
     setSourceText(text);
     if (text.trim()) {
-      translate({ text, from: fromLang, to: toLang, keepContext });
+      translate({ text, source_lang: fromLang, target_lang: toLang, preserve_pedagogical_context: keepContext });
     }
   };
 

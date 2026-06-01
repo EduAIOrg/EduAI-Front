@@ -14,11 +14,9 @@ export interface ApiResponse<T> {
   success: boolean;
 }
 
-/** Erreur API standard */
+/** Erreur API FastAPI */
 export interface ApiError {
-  message: string;
-  statusCode: number;
-  errors?: Record<string, string[]>;
+  detail: string | Array<{ loc: (string | number)[]; msg: string; type: string }>;
 }
 
 /** Stats du dashboard */
@@ -54,22 +52,22 @@ export interface Lacune {
   description: string;
 }
 
-/** Requête de traduction */
+/** Requête de traduction (aligné avec TranslateRequest backend) */
 export interface TranslateRequest {
   text: string;
-  from: 'fr' | 'en';
-  to: 'fr' | 'en';
-  keepContext: boolean;
+  source_lang: 'fr' | 'en';
+  target_lang: 'fr' | 'en';
+  preserve_pedagogical_context?: boolean;
 }
 
-/** Réponse de traduction */
+/** Réponse de traduction (aligné avec TranslateResponse backend) */
 export interface TranslateResponse {
-  translatedText: string;
-  from: string;
-  to: string;
+  translated_text: string;
+  source_lang: string;
+  target_lang: string;
 }
 
-/** Historique de traduction */
+/** Historique de traduction (local) */
 export interface TranslationHistory {
   id: string;
   sourceText: string;

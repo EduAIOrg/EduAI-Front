@@ -16,6 +16,7 @@ export default function ChatPage() {
     sendMessage,
     isLoading,
     newConversation,
+    loadConversation,
     clearHistory,
     setActiveConversation,
   } = useChat();
@@ -72,7 +73,7 @@ export default function ChatPage() {
               {conversations.map((conv) => (
                 <li key={conv.id}>
                   <motion.button
-                    onClick={() => setActiveConversation(conv)}
+                    onClick={() => loadConversation(conv.id)}
                     className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-xs transition-colors ${
                       activeConversation?.id === conv.id
                         ? 'bg-[#6C63FF]/10 text-[#6C63FF]'
@@ -83,7 +84,7 @@ export default function ChatPage() {
                     <MessageSquare className="h-3.5 w-3.5 shrink-0" />
                     <div className="flex-1 overflow-hidden">
                       <p className="truncate font-medium">{conv.title}</p>
-                      <p className="text-[10px] opacity-70">{formatRelativeDate(conv.updatedAt)}</p>
+                      <p className="text-[10px] opacity-70">{formatRelativeDate(conv.created_at)}</p>
                     </div>
                   </motion.button>
                 </li>
@@ -117,7 +118,7 @@ export default function ChatPage() {
               <span className="text-sm font-medium text-[#F0F0F8]">
                 {activeConversation.title}
               </span>
-              {activeConversation.documentId && (
+              {activeConversation.document_id && (
                 <span className="flex items-center gap-1 rounded-full bg-[#6C63FF]/10 px-2 py-0.5 text-[10px] text-[#6C63FF]">
                   <FileText className="h-3 w-3" />
                   Document lié
@@ -127,7 +128,7 @@ export default function ChatPage() {
             <div className="flex-1 overflow-hidden">
               <ChatWindow
                 messages={activeConversation.messages}
-                onSend={(msg) => sendMessage(msg, activeConversation.documentId)}
+                onSend={(msg) => sendMessage(msg, activeConversation.document_id || undefined)}
                 isLoading={isLoading}
               />
             </div>

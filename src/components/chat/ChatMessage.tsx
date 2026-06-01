@@ -44,7 +44,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
         }`}
       >
         {isUser ? (
-          user ? getInitials(user.name) : 'U'
+          user ? getInitials(user.full_name) : 'U'
         ) : (
           <Sparkles className="h-4 w-4" />
         )}

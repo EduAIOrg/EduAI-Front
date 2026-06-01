@@ -143,11 +143,11 @@ const MobileNav = () => {
               <div className="absolute bottom-0 left-0 right-0 border-t border-[#1E1E2E] px-4 py-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#6C63FF] to-[#00D4AA] text-xs font-bold text-white">
-                    {user ? getInitials(user.name) : 'U'}
+                    {user ? getInitials(user.full_name) : 'U'}
                   </div>
                   <div className="flex-1 overflow-hidden">
                     <p className="truncate text-sm font-medium text-[#F0F0F8]">
-                      {user?.name || 'Utilisateur'}
+                      {user?.full_name || 'Utilisateur'}
                     </p>
                   </div>
                   <button

@@ -19,7 +19,7 @@ const useQuizById = (id: string) =>
     queryKey: ['quizzes', id],
     queryFn: async (): Promise<Quiz> => {
       const { data } = await api.get(`/api/quiz/${id}`);
-      return data.data;
+      return data;
     },
     enabled: !!id,
   });
@@ -28,47 +28,40 @@ const useQuizById = (id: string) =>
 const DEMO_QUIZ: Quiz = {
   id: 'demo',
   title: 'Quiz démo — Algorithmes',
-  documentId: '1',
-  documentTitle: 'Cours d\'Algorithmes.pdf',
+  document_id: '1',
+  user_id: 'demo',
   difficulty: 'medium',
-  type: 'mcq',
-  totalQuestions: 3,
-  createdAt: new Date().toISOString(),
+  quiz_type: 'mcq',
+  status: 'ready',
+  created_at: new Date().toISOString(),
   questions: [
     {
       id: 'q1',
-      question: 'Quelle est la complexité temporelle du tri fusion (Merge Sort) dans le pire des cas ?',
-      type: 'mcq',
-      explanation: 'Le tri fusion divise le tableau en deux à chaque étape (log n) et fusionne en O(n), donnant O(n log n).',
-      options: [
-        { id: 'a', text: 'O(n²)', isCorrect: false },
-        { id: 'b', text: 'O(n log n)', isCorrect: true },
-        { id: 'c', text: 'O(log n)', isCorrect: false },
-        { id: 'd', text: 'O(n)', isCorrect: false },
-      ],
+      quiz_id: 'demo',
+      content: 'Quelle est la complexité temporelle du tri fusion (Merge Sort) dans le pire des cas ?',
+      question_type: 'mcq',
+      order_index: 0,
+      options: ['O(n²)', 'O(n log n)', 'O(log n)', 'O(n)'],
     },
     {
       id: 'q2',
-      question: 'Quelle structure de données utilise le principe LIFO (Last In, First Out) ?',
-      type: 'mcq',
-      explanation: 'Une Pile (Stack) suit le principe LIFO : le dernier élément ajouté est le premier à être retiré.',
-      options: [
-        { id: 'a', text: 'File (Queue)', isCorrect: false },
-        { id: 'b', text: 'Liste chaînée', isCorrect: false },
-        { id: 'c', text: 'Pile (Stack)', isCorrect: true },
-        { id: 'd', text: 'Tableau dynamique', isCorrect: false },
-      ],
+      quiz_id: 'demo',
+      content: 'Quelle structure de données utilise le principe LIFO (Last In, First Out) ?',
+      question_type: 'mcq',
+      order_index: 1,
+      options: ['File (Queue)', 'Liste chaînée', 'Pile (Stack)', 'Tableau dynamique'],
     },
     {
       id: 'q3',
-      question: 'Qu\'est-ce qu\'un arbre binaire de recherche (ABR) ?',
-      type: 'mcq',
-      explanation: 'Dans un ABR, pour chaque nœud, tous les nœuds du sous-arbre gauche sont inférieurs et tous ceux du sous-arbre droit sont supérieurs.',
+      quiz_id: 'demo',
+      content: 'Qu\'est-ce qu\'un arbre binaire de recherche (ABR) ?',
+      question_type: 'mcq',
+      order_index: 2,
       options: [
-        { id: 'a', text: 'Un arbre où chaque nœud a exactement 2 enfants', isCorrect: false },
-        { id: 'b', text: 'Un arbre où les valeurs gauches < nœud < valeurs droites', isCorrect: true },
-        { id: 'c', text: 'Un arbre équilibré à chaque niveau', isCorrect: false },
-        { id: 'd', text: 'Un arbre dont la hauteur est log n', isCorrect: false },
+        'Un arbre où chaque nœud a exactement 2 enfants',
+        'Un arbre où les valeurs gauches < nœud < valeurs droites',
+        'Un arbre équilibré à chaque niveau',
+        'Un arbre dont la hauteur est log n',
       ],
     },
   ],
@@ -83,7 +76,7 @@ export default function QuizViewPage({ params }: { params: Promise<{ id: string 
   const [startTime] = useState(Date.now());
 
   const { data: quizData, isLoading } = useQuizById(id);
-  const { submitAnswer, isSubmitting } = useQuiz();
+  const { submitQuiz, isSubmitting } = useQuiz();
 
   const quiz =
   quizData && Array.isArray(quizData.questions)
@@ -98,14 +91,11 @@ const currentQuestion = questions[currentIndex];
     const questionId = currentQuestion.id;
     setAnswers((prev) => ({ ...prev, [questionId]: answer }));
 
-    // Demo feedback (appel API réel en prod)
-    const isCorrect = currentQuestion.options
-      ? currentQuestion.options.find((o) => o.id === answer)?.isCorrect ?? false
-      : true;
-
+    // Feedback local pour l'affichage immédiat
+    const selectedIdx = answer.charCodeAt(0) - 65;
     const fb = {
-      isCorrect,
-      explanation: currentQuestion.explanation,
+      isCorrect: false, // Will be determined by backend on submit
+      explanation: 'La réponse sera vérifiée à la soumission finale.',
     };
     setFeedbacks((prev) => ({ ...prev, [questionId]: fb }));
   };
@@ -177,7 +167,7 @@ const currentQuestion = questions[currentIndex];
         </Link>
         <div>
           <h1 className="text-lg font-bold text-[#F0F0F8]">{quiz.title}</h1>
-          <p className="text-xs text-[#8888AA]">{quiz.documentTitle}</p>
+          <p className="text-xs text-[#8888AA]">{quiz.quiz_type === 'mcq' ? 'QCM' : quiz.quiz_type === 'open' ? 'Questions ouvertes' : 'Mixte'}</p>
         </div>
       </div>
 

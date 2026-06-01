@@ -2,13 +2,14 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useChat } from './useChat';
+import api from '@/lib/api';
 
-/** États possibles du mode vocal */
 export type VoiceState = 'idle' | 'listening' | 'processing' | 'speaking';
 
 /**
  * Hook pour le mode vocal.
- * Utilise Web Speech API pour la reconnaissance et la synthèse vocale.
+ * Utilise le backend pour transcription (Whisper) et synthèse (TTS).
+ * Fallback sur Web Speech API si le backend n'est pas disponible.
  */
 export const useVoice = () => {
   const [voiceState, setVoiceState] = useState<VoiceState>('idle');
@@ -20,22 +21,49 @@ export const useVoice = () => {
   >([]);
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const synthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   const { sendMessage, activeConversation } = useChat();
 
-  /** Vérifie le support du navigateur */
   useEffect(() => {
+    setIsSupported(
+      typeof window !== 'undefined' &&
+      !!(navigator.mediaDevices?.getUserMedia)
+    );
+  }, []);
+
+  /** Démarre l'enregistrement audio pour transcription backend */
+  const startListening = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        await transcribeAudio(audioBlob);
+      };
+
+      mediaRecorderRef.current = mediaRecorder;
+      mediaRecorder.start();
+      setVoiceState('listening');
+    } catch {
+      // Fallback: Web Speech API
+      startWebSpeechListening();
+    }
+  }, []);
+
+  /** Fallback: Web Speech API */
+  const startWebSpeechListening = useCallback(() => {
     const SpeechRecognitionAPI =
       typeof window !== 'undefined'
         ? window.SpeechRecognition || window.webkitSpeechRecognition
         : null;
-    setIsSupported(!!SpeechRecognitionAPI);
-  }, []);
-
-  /** Démarre la reconnaissance vocale */
-  const startListening = useCallback(() => {
-    const SpeechRecognitionAPI =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognitionAPI) return;
 
     const recognition = new SpeechRecognitionAPI();
@@ -50,8 +78,9 @@ export const useVoice = () => {
     };
     recognition.onend = () => {
       setVoiceState('processing');
-      if (transcript.trim()) {
-        handleSendVoiceQuery(transcript);
+      const currentTranscript = transcript;
+      if (currentTranscript.trim()) {
+        handleSendVoiceQuery(currentTranscript);
       } else {
         setVoiceState('idle');
       }
@@ -64,21 +93,44 @@ export const useVoice = () => {
 
   /** Arrête l'écoute */
   const stopListening = useCallback(() => {
+    if (mediaRecorderRef.current?.state === 'recording') {
+      mediaRecorderRef.current.stop();
+    }
     recognitionRef.current?.stop();
   }, []);
 
+  /** Transcrit l'audio via le backend */
+  const transcribeAudio = async (audioBlob: Blob) => {
+    setVoiceState('processing');
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.webm');
+      const { data } = await api.post('/api/voice/transcribe', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const text = data.transcript;
+      setTranscript(text);
+      if (text.trim()) {
+        handleSendVoiceQuery(text);
+      } else {
+        setVoiceState('idle');
+      }
+    } catch {
+      setVoiceState('idle');
+    }
+  };
+
   /** Envoie la requête vocale au chat IA */
   const handleSendVoiceQuery = useCallback(
-    (text: string) => {
+    async (text: string) => {
       setSessionHistory((prev) => [
         ...prev,
         { role: 'user', content: text, timestamp: new Date().toISOString() },
       ]);
-
       sendMessage(text);
 
-      // Simule une réponse IA pour la démo
-      setTimeout(() => {
+      // Attend la réponse
+      setTimeout(async () => {
         const lastMessage = activeConversation?.messages?.slice(-1)[0];
         const responseText = lastMessage?.content || "Je traite votre demande...";
         setAiResponse(responseText);
@@ -86,34 +138,65 @@ export const useVoice = () => {
           ...prev,
           { role: 'assistant', content: responseText, timestamp: new Date().toISOString() },
         ]);
-        speak(responseText);
-      }, 1500);
+        await speak(responseText);
+      }, 2000);
     },
     [sendMessage, activeConversation]
   );
 
-  /** Synthèse vocale de la réponse IA */
-  const speak = useCallback((text: string) => {
-    if (!window.speechSynthesis) return;
+  /** Synthèse vocale via le backend, fallback sur Web Speech API */
+  const speak = useCallback(async (text: string) => {
+    setVoiceState('speaking');
+    try {
+      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://eduai-back.onrender.com';
+      const token = localStorage.getItem('eduai_token');
+      const response = await fetch(`${baseURL}/api/voice/synthesize`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ text, lang: 'fr' }),
+      });
 
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'fr-FR';
-    utterance.rate = 1;
-    utterance.onstart = () => setVoiceState('speaking');
-    utterance.onend = () => setVoiceState('idle');
+      if (response.ok) {
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        audio.onended = () => {
+          setVoiceState('idle');
+          URL.revokeObjectURL(audioUrl);
+        };
+        audio.onerror = () => {
+          setVoiceState('idle');
+          URL.revokeObjectURL(audioUrl);
+        };
+        await audio.play();
+        return;
+      }
+    } catch {
+      // Fallback
+    }
 
-    synthesisRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
+    // Fallback: Web Speech API
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'fr-FR';
+      utterance.rate = 1;
+      utterance.onstart = () => setVoiceState('speaking');
+      utterance.onend = () => setVoiceState('idle');
+      window.speechSynthesis.speak(utterance);
+    } else {
+      setVoiceState('idle');
+    }
   }, []);
 
-  /** Arrête la synthèse vocale */
   const stopSpeaking = useCallback(() => {
     window.speechSynthesis?.cancel();
     setVoiceState('idle');
   }, []);
 
-  /** Toggle écoute */
   const toggleListening = useCallback(() => {
     if (voiceState === 'listening') {
       stopListening();

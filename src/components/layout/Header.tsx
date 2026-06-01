@@ -149,7 +149,7 @@ const Header = () => {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
-          {user ? getInitials(user.name) : 'U'}
+          {user ? getInitials(user.full_name) : 'U'}
         </motion.div>
       </div>
     </header>

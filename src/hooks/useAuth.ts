@@ -1,28 +1,34 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
-import { LoginCredentials, RegisterData, AuthResponse, User } from '@/types/auth';
+import { LoginCredentials, RegisterData, TokenResponse, User } from '@/types/auth';
 import { ROUTES } from '@/constants/routes';
 
 /**
  * Hook d'authentification complet.
  * Gère login, register, logout et récupération du profil.
+ * 
+ * Le backend FastAPI utilise :
+ * - POST /api/auth/login : form-data (username + password) → TokenResponse
+ * - POST /api/auth/register : JSON (email, password, full_name) → TokenResponse
+ * - GET /api/auth/me : → UserResponse
  */
 export const useAuth = () => {
   const router = useRouter();
-  const { setAuth, clearAuth, setLoading, setUser } = useAuthStore();
+  const queryClient = useQueryClient();
+  const { setAuth, clearAuth, setLoading, setUser, token } = useAuthStore();
 
   /** Récupère le profil de l'utilisateur connecté */
   const meQuery = useQuery({
     queryKey: ['auth', 'me'],
     queryFn: async (): Promise<User> => {
       const { data } = await api.get('/api/auth/me');
-      return data.data;
+      return data;
     },
     enabled: typeof window !== 'undefined' && !!localStorage.getItem('eduai_token'),
     retry: false,
@@ -30,34 +36,30 @@ export const useAuth = () => {
 
   /** Mutation de connexion */
   const loginMutation = useMutation({
-    mutationFn: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-      // MOCK DATA FOR TESTING
-      if (credentials.email === 'test@eduai.africa') {
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            resolve({
-              token: 'mock-jwt-token-12345',
-              refreshToken: 'mock-refresh-token-12345',
-              user: { 
-                id: 'test-123', 
-                name: 'Utilisateur Test', 
-                email: 'test@eduai.africa', 
-                role: 'student', 
-                createdAt: new Date().toISOString(), 
-                updatedAt: new Date().toISOString() 
-              }
-            });
-          }, 1000);
-        });
-      }
-      
-      const { data } = await api.post('/api/auth/login', credentials);
+    mutationFn: async (credentials: LoginCredentials): Promise<TokenResponse> => {
+      // Le backend attend application/x-www-form-urlencoded avec username (pas email)
+      const formData = new URLSearchParams();
+      formData.append('username', credentials.email);
+      formData.append('password', credentials.password);
+
+      const { data } = await api.post('/api/auth/login', formData, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      });
       return data;
     },
-    onSuccess: (data) => {
-      setAuth(data.user, data.token);
-      toast.success(`Bienvenue, ${data.user.name} ! 🎉`);
-      router.push(ROUTES.DASHBOARD);
+    onSuccess: async (data) => {
+      // Stocker le token puis récupérer le profil
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('eduai_token', data.access_token);
+      }
+      try {
+        const { data: user } = await api.get('/api/auth/me');
+        setAuth(user, data.access_token);
+        toast.success(`Bienvenue, ${user.full_name} ! 🎉`);
+        router.push(ROUTES.DASHBOARD);
+      } catch {
+        toast.error('Erreur lors de la récupération du profil.');
+      }
     },
     onError: () => {
       toast.error('Email ou mot de passe incorrect.');
@@ -66,34 +68,26 @@ export const useAuth = () => {
 
   /** Mutation d'inscription */
   const registerMutation = useMutation({
-    mutationFn: async (registerData: RegisterData): Promise<AuthResponse> => {
-      // MOCK DATA FOR TESTING
-      if (registerData.email === 'test@eduai.africa') {
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            resolve({
-              token: 'mock-jwt-token-12345',
-              refreshToken: 'mock-refresh-token-12345',
-              user: { 
-                id: 'test-123', 
-                name: registerData.name, 
-                email: 'test@eduai.africa', 
-                role: 'student', 
-                createdAt: new Date().toISOString(), 
-                updatedAt: new Date().toISOString() 
-              }
-            });
-          }, 1000);
-        });
-      }
-
-      const { data } = await api.post('/api/auth/register', registerData);
+    mutationFn: async (registerData: RegisterData): Promise<TokenResponse> => {
+      const { data } = await api.post('/api/auth/register', {
+        email: registerData.email,
+        password: registerData.password,
+        full_name: registerData.full_name,
+      });
       return data;
     },
-    onSuccess: (data) => {
-      setAuth(data.user, data.token);
-      toast.success('Compte créé avec succès ! 🎉');
-      router.push(ROUTES.DASHBOARD);
+    onSuccess: async (data) => {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('eduai_token', data.access_token);
+      }
+      try {
+        const { data: user } = await api.get('/api/auth/me');
+        setAuth(user, data.access_token);
+        toast.success('Compte créé avec succès ! 🎉');
+        router.push(ROUTES.DASHBOARD);
+      } catch {
+        toast.error('Erreur lors de la récupération du profil.');
+      }
     },
     onError: () => {
       toast.error("Erreur lors de l'inscription.");
@@ -103,6 +97,7 @@ export const useAuth = () => {
   /** Déconnexion */
   const logout = () => {
     clearAuth();
+    queryClient.clear();
     toast.success('Déconnexion réussie.');
     router.push(ROUTES.LOGIN);
   };

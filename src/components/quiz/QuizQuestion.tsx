@@ -65,14 +65,15 @@ const QuizQuestion = ({
 
       {/* Question */}
       <div className="mb-6 rounded-2xl border border-[#1E1E2E] bg-[#13131A] p-6">
-        <h2 className="text-lg font-semibold text-[#F0F0F8]">{question.question}</h2>
+        <h2 className="text-lg font-semibold text-[#F0F0F8]">{question.content}</h2>
       </div>
 
       {/* Options QCM */}
-      {question.type === 'mcq' && question.options && (
+      {question.question_type === 'mcq' && question.options && (
         <div className="space-y-3">
-          {question.options.map((option) => {
-            const isSelected = selectedOption === option.id;
+          {question.options.map((optionText, idx) => {
+            const optionId = String.fromCharCode(65 + idx);
+            const isSelected = selectedOption === optionId;
             const showResult = feedback !== null && feedback !== undefined;
             let optionStyle = 'border-[#1E1E2E] bg-[#13131A] hover:border-[#6C63FF]/30';
 
@@ -80,14 +81,12 @@ const QuizQuestion = ({
               optionStyle = feedback.isCorrect
                 ? 'border-[#00D4AA] bg-[#00D4AA]/10'
                 : 'border-[#FF5470] bg-[#FF5470]/10';
-            } else if (showResult && option.isCorrect) {
-              optionStyle = 'border-[#00D4AA]/50 bg-[#00D4AA]/5';
             }
 
             return (
               <motion.button
-                key={option.id}
-                onClick={() => handleSubmitMCQ(option.id)}
+                key={optionId}
+                onClick={() => handleSubmitMCQ(optionId)}
                 disabled={!!feedback || isSubmitting}
                 className={`flex w-full items-center gap-3 rounded-xl border p-4 text-left text-sm transition-all ${optionStyle} disabled:cursor-default`}
                 whileHover={!feedback ? { scale: 1.01 } : {}}
@@ -105,10 +104,10 @@ const QuizQuestion = ({
                   {showResult && isSelected ? (
                     feedback.isCorrect ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />
                   ) : (
-                    String.fromCharCode(65 + (question.options?.indexOf(option) || 0))
+                    optionId
                   )}
                 </div>
-                <span className="text-[#F0F0F8]">{option.text}</span>
+                <span className="text-[#F0F0F8]">{optionText}</span>
               </motion.button>
             );
           })}
@@ -116,7 +115,7 @@ const QuizQuestion = ({
       )}
 
       {/* Question ouverte */}
-      {question.type === 'open' && (
+      {question.question_type === 'open' && (
         <div className="space-y-3">
           <textarea
             value={openAnswer}

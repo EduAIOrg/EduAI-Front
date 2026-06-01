@@ -2,11 +2,10 @@
 export interface User {
   id: string;
   email: string;
-  name: string;
-  avatar?: string;
-  role: 'student' | 'teacher' | 'admin';
-  createdAt: string;
-  updatedAt: string;
+  full_name: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 /** Données du formulaire de connexion */
@@ -17,17 +16,17 @@ export interface LoginCredentials {
 
 /** Données du formulaire d'inscription */
 export interface RegisterData {
-  name: string;
+  full_name: string;
   email: string;
   password: string;
   confirmPassword: string;
 }
 
-/** Réponse d'authentification du serveur */
-export interface AuthResponse {
-  user: User;
-  token: string;
-  refreshToken: string;
+/** Réponse token du backend (login / register) */
+export interface TokenResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
 }
 
 /** État du store d'authentification */

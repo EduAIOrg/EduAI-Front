@@ -1,27 +1,50 @@
 /** Rôle de l'auteur du message */
-export type MessageRole = 'user' | 'assistant' | 'system';
+export type MessageRole = 'user' | 'assistant';
 
-/** Un message dans le chat */
+/** Un message dans le chat (aligné avec MessageResponse backend) */
 export interface ChatMessage {
   id: string;
+  conversation_id: string;
   role: MessageRole;
   content: string;
-  createdAt: string;
+  created_at: string;
+  /** Champs locaux uniquement (pas dans le backend) */
   isStreaming?: boolean;
   feedback?: 'up' | 'down' | null;
 }
 
-/** Une conversation de chat */
-export interface Conversation {
+/** Item de liste de conversations (aligné avec ConversationListItem backend) */
+export interface ConversationListItem {
   id: string;
   title: string;
-  documentId?: string;
+  created_at: string;
+  last_message?: string | null;
+  message_count: number;
+}
+
+/** Une conversation de chat complète (aligné avec ConversationResponse backend) */
+export interface Conversation {
+  id: string;
+  user_id?: string;
+  document_id?: string | null;
+  title: string;
   messages: ChatMessage[];
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at?: string;
+}
+
+/** Requête de création de conversation */
+export interface ConversationCreateRequest {
+  document_id?: string | null;
+  title?: string;
 }
 
 /** Requête d'envoi de message */
+export interface MessageCreateRequest {
+  content: string;
+}
+
+/** Requête d'envoi de message (compatibilité interne) */
 export interface SendMessageRequest {
   content: string;
   conversationId?: string;
@@ -30,14 +53,13 @@ export interface SendMessageRequest {
 
 /** État du store chat */
 export interface ChatState {
-  conversations: Conversation[];
+  conversations: ConversationListItem[];
   activeConversation: Conversation | null;
   isStreaming: boolean;
-  setConversations: (conversations: Conversation[]) => void;
+  setConversations: (conversations: ConversationListItem[]) => void;
   setActiveConversation: (conversation: Conversation | null) => void;
   addMessage: (message: ChatMessage) => void;
   updateLastMessage: (content: string) => void;
   setStreaming: (streaming: boolean) => void;
-  createConversation: (title: string, documentId?: string) => Conversation;
   clearHistory: () => void;
 }

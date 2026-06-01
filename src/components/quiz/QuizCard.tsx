@@ -3,12 +3,12 @@
 import { motion } from 'framer-motion';
 import { Brain, Trophy, Clock, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { Quiz } from '@/types/quiz';
+import { QuizListItem } from '@/types/quiz';
 import { ROUTES } from '@/constants/routes';
 import { formatDate } from '@/lib/utils';
 
 interface QuizCardProps {
-  quiz: Quiz;
+  quiz: QuizListItem;
   index?: number;
 }
 
@@ -50,30 +50,25 @@ const QuizCard = ({ quiz, index = 0 }: QuizCardProps) => {
           {quiz.title}
         </h3>
         <p className="mb-3 text-xs text-[#8888AA]">
-          {quiz.documentTitle}
+          {quiz.quiz_type === 'mcq' ? 'QCM' : quiz.quiz_type === 'open' ? 'Questions ouvertes' : 'Mixte'}
         </p>
 
         {/* Infos */}
         <div className="mb-4 flex items-center gap-4 text-xs text-[#8888AA]">
           <span className="flex items-center gap-1">
             <Brain className="h-3.5 w-3.5" />
-            {quiz.totalQuestions} questions
+            {quiz.question_count} questions
           </span>
-          {quiz.score !== undefined && (
+          {quiz.last_score != null && (
             <span className="flex items-center gap-1">
               <Trophy className="h-3.5 w-3.5 text-[#FFB547]" />
-              {quiz.score}%
+              {Math.round(quiz.last_score * 100)}%
             </span>
           )}
-          {quiz.duration && (
-            <span className="flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5" />
-              {Math.floor(quiz.duration / 60)}min
-            </span>
-          )}
+
         </div>
 
-        <p className="mb-4 text-[10px] text-[#8888AA]">{formatDate(quiz.createdAt)}</p>
+        <p className="mb-4 text-[10px] text-[#8888AA]">{formatDate(quiz.created_at)}</p>
 
         {/* Action */}
         <Link href={ROUTES.QUIZ_VIEW(quiz.id)}>
@@ -82,7 +77,7 @@ const QuizCard = ({ quiz, index = 0 }: QuizCardProps) => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            {quiz.score !== undefined ? 'Revoir' : 'Commencer'}
+            {quiz.last_score != null ? 'Revoir' : 'Commencer'}
             <ArrowRight className="h-3.5 w-3.5" />
           </motion.button>
         </Link>

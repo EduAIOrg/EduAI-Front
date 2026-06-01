@@ -26,7 +26,7 @@ const useDocument = (id: string) =>
     queryKey: ['documents', id],
     queryFn: async (): Promise<Document> => {
       const { data } = await api.get(`/api/documents/${id}`);
-      return data.data;
+      return data;
     },
     enabled: !!id,
   });
@@ -64,15 +64,13 @@ export default function DocumentViewPage({
   const doc = document ?? {
     id,
     title: 'Document PDF',
-    fileName: 'document.pdf',
-    fileUrl: '',
-    fileSize: 0,
-    pageCount: 20,
-    hasSummary: true,
+    filename: 'document.pdf',
+    file_size: 0,
+    page_count: 20,
+    status: 'ready' as const,
     summary: 'Ce document traite des concepts fondamentaux...',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    userId: '',
+    created_at: new Date().toISOString(),
+    user_id: '',
   };
 
   return (
@@ -98,7 +96,16 @@ export default function DocumentViewPage({
       <div className="flex flex-1 gap-4 overflow-hidden">
         {/* PDF Viewer 60% */}
         <div className="hidden flex-1 overflow-hidden lg:block">
-          <PDFViewer fileUrl={doc.fileUrl} pageCount={doc.pageCount} />
+          <PDFViewer 
+            fileUrl={
+              doc.filename 
+                ? doc.filename.startsWith('http://') || doc.filename.startsWith('https://')
+                  ? doc.filename
+                  : `${process.env.NEXT_PUBLIC_API_URL || 'https://eduai-back-production.up.railway.app'}/static/${doc.filename}`
+                : `${process.env.NEXT_PUBLIC_API_URL || 'https://eduai-back-production.up.railway.app'}/api/documents/${doc.id}`
+            } 
+            pageCount={doc.page_count} 
+          />
         </div>
 
         {/* Side panel 40% */}
@@ -125,7 +132,7 @@ export default function DocumentViewPage({
           <div className="flex-1 overflow-y-auto custom-scrollbar">
             {activeTab === 'summary' && (
               <SummaryPanel
-                summary={summaryQuery.data || doc.summary || ''}
+                summary={summaryQuery.data?.summary || doc.summary || ''}
                 isLoading={summaryQuery.isLoading}
               />
             )}

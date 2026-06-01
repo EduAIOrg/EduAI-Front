@@ -1,7 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
-import { ChatState, ChatMessage, Conversation } from '@/types/chat';
+import { ChatState, ChatMessage, Conversation, ConversationListItem } from '@/types/chat';
 
 /**
  * Store Zustand pour la gestion du chat IA.
@@ -12,7 +12,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   activeConversation: null,
   isStreaming: false,
 
-  setConversations: (conversations: Conversation[]) => set({ conversations }),
+  setConversations: (conversations: ConversationListItem[]) => set({ conversations }),
 
   setActiveConversation: (conversation: Conversation | null) => set({ activeConversation: conversation }),
 
@@ -23,15 +23,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const updated = {
       ...activeConversation,
       messages: [...activeConversation.messages, message],
-      updatedAt: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
 
-    set((state) => ({
-      activeConversation: updated,
-      conversations: state.conversations.map((c) =>
-        c.id === updated.id ? updated : c
-      ),
-    }));
+    set({ activeConversation: updated });
   },
 
   updateLastMessage: (content: string) => {
@@ -40,36 +35,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     const messages = [...activeConversation.messages];
     const lastMsg = messages[messages.length - 1];
-    messages[messages.length - 1] = { ...lastMsg, content };
+    messages[messages.length - 1] = { ...lastMsg, content, isStreaming: false };
 
     const updated = { ...activeConversation, messages };
-    set((state) => ({
-      activeConversation: updated,
-      conversations: state.conversations.map((c) =>
-        c.id === updated.id ? updated : c
-      ),
-    }));
+    set({ activeConversation: updated });
   },
 
   setStreaming: (isStreaming: boolean) => set({ isStreaming }),
-
-  createConversation: (title: string, documentId?: string) => {
-    const newConversation: Conversation = {
-      id: crypto.randomUUID(),
-      title,
-      documentId,
-      messages: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    set((state) => ({
-      conversations: [newConversation, ...state.conversations],
-      activeConversation: newConversation,
-    }));
-
-    return newConversation;
-  },
 
   clearHistory: () => set({ conversations: [], activeConversation: null }),
 }));

@@ -34,7 +34,7 @@ const DocumentCard = ({ document, onDelete, index = 0 }: DocumentCardProps) => {
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#6C63FF]/10">
             <FileText className="h-6 w-6 text-[#6C63FF]" />
           </div>
-          {document.hasSummary && (
+          {document.summary && (
             <span className="rounded-full bg-[#00D4AA]/10 px-2.5 py-1 text-[10px] font-semibold text-[#00D4AA]">
               Résumé prêt
             </span>
@@ -50,15 +50,15 @@ const DocumentCard = ({ document, onDelete, index = 0 }: DocumentCardProps) => {
         <div className="mb-4 flex items-center gap-4 text-xs text-[#8888AA]">
           <span className="flex items-center gap-1">
             <Calendar className="h-3.5 w-3.5" />
-            {formatDate(document.createdAt)}
+            {formatDate(document.created_at)}
           </span>
           <span className="flex items-center gap-1">
             <BookOpen className="h-3.5 w-3.5" />
-            {document.pageCount} pages
+            {document.page_count} pages
           </span>
         </div>
 
-        <p className="mb-4 text-xs text-[#8888AA]">{formatFileSize(document.fileSize)}</p>
+        <p className="mb-4 text-xs text-[#8888AA]">{formatFileSize(document.file_size)}</p>
 
         {/* Actions */}
         <div className="flex items-center gap-2">
