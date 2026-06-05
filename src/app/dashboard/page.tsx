@@ -1,5 +1,6 @@
 'use client';
 
+import { ComponentType } from 'react';
 import { motion } from 'framer-motion';
 import {
   FileText,
@@ -65,14 +66,13 @@ export default function DashboardPage() {
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 3);
 
-  // Process Recent Activity
   const activities: {
     id: string;
     type: string;
     title: string;
     description: string;
     createdAt: string;
-    icon: any;
+    icon: ComponentType<{ className?: string; style?: React.CSSProperties }>;
     color: string;
   }[] = [];
 

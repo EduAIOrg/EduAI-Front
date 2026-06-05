@@ -134,7 +134,7 @@ const Header = () => {
                     <p className="mt-1 text-[10px] text-[#8888AA]">Il y a 5 min</p>
                   </div>
                   <div className="rounded-xl bg-[#0A0A0F] p-3">
-                    <p className="text-xs text-[#F0F0F8]">Quiz "Algorithmes" terminé</p>
+                    <p className="text-xs text-[#F0F0F8]">Quiz &quot;Algorithmes&quot; terminé</p>
                     <p className="mt-1 text-[10px] text-[#8888AA]">Il y a 1h</p>
                   </div>
                 </div>

@@ -87,7 +87,7 @@ export default function LandingPage() {
           >
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--primary)]/30 bg-[var(--primary)]/10 px-4 py-1.5 text-sm font-medium text-[var(--text-primary)] backdrop-blur-md">
               <span className="flex h-2 w-2 rounded-full bg-[var(--accent)] animate-pulse" />
-              L'IA au service de l'éducation africaine
+              L&apos;IA au service de l&apos;éducation africaine
             </div>
 
             <h1 className="max-w-4xl text-5xl font-extrabold tracking-tight md:text-7xl drop-shadow-xl">
@@ -123,7 +123,7 @@ export default function LandingPage() {
             <div className="mt-12 flex items-center gap-6 text-sm text-[var(--text-primary)] font-medium drop-shadow-md">
               <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-[var(--accent)] drop-shadow" /> Gratuit pour commencer</div>
               <div className="hidden sm:flex items-center gap-2"><CheckCircle className="h-4 w-4 text-[var(--accent)] drop-shadow" /> Sans carte bancaire</div>
-              <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-[var(--accent)] drop-shadow" /> Conçu pour l'Afrique</div>
+              <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-[var(--accent)] drop-shadow" /> Conçu pour l&apos;Afrique</div>
             </div>
           </motion.div>
         </section>
@@ -187,10 +187,9 @@ export default function LandingPage() {
           </div>
 
           <div className="grid gap-8 md:grid-cols-2 max-w-4xl mx-auto">
-            {/* Free Plan */}
             <div className="rounded-3xl border border-[var(--bg-border)] bg-[var(--bg-surface)] p-8 shadow-lg">
               <h3 className="text-2xl font-bold">Découverte</h3>
-              <p className="mt-2 text-[var(--text-secondary)]">Pour tester l'IA pédagogique.</p>
+              <p className="mt-2 text-[var(--text-secondary)]">Pour tester l&apos;IA pédagogique.</p>
               <div className="my-6">
                 <span className="text-4xl font-extrabold">0 FCFA</span>
                 <span className="text-[var(--text-secondary)]"> / mois</span>
@@ -269,7 +268,7 @@ export default function LandingPage() {
               <span className="text-lg font-bold">EduAI Africa</span>
             </div>
             <p className="mt-4 text-sm text-[var(--text-secondary)] leading-relaxed">
-              L'assistant pédagogique nouvelle génération conçu spécifiquement pour les étudiants africains. Révélez votre potentiel.
+              L&apos;assistant pédagogique nouvelle génération conçu spécifiquement pour les étudiants africains. Révélez votre potentiel.
             </p>
           </div>
 
@@ -290,7 +289,7 @@ export default function LandingPage() {
             <ul className="mt-4 space-y-2 text-sm text-[var(--text-secondary)]">
               <li><a href="#" className="hover:text-[var(--primary)] transition-colors">Blog</a></li>
               <li><a href="#" className="hover:text-[var(--primary)] transition-colors">Tutoriels & Guides</a></li>
-              <li><a href="#" className="hover:text-[var(--primary)] transition-colors">Centre d'aide</a></li>
+              <li><a href="#" className="hover:text-[var(--primary)] transition-colors">Centre d&apos;aide</a></li>
               <li><a href="#" className="hover:text-[var(--primary)] transition-colors">Nous contacter</a></li>
             </ul>
           </div>
@@ -298,7 +297,7 @@ export default function LandingPage() {
           {/* Newsletter */}
           <div>
             <h4 className="font-semibold text-[var(--text-primary)]">Newsletter</h4>
-            <p className="mt-4 text-sm text-[var(--text-secondary)]">Recevez nos dernières astuces pour optimiser vos révisions avec l'IA.</p>
+            <p className="mt-4 text-sm text-[var(--text-secondary)]">Recevez nos dernières astuces pour optimiser vos révisions avec l&apos;IA.</p>
             <div className="mt-4 flex gap-2">
               <input type="email" placeholder="Votre email" className="w-full rounded-xl border border-[var(--bg-border)] bg-[var(--bg-base)] px-3 py-2 text-sm outline-none focus:border-[var(--primary)] transition-colors" />
               <button className="rounded-xl bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--primary-hover)]">OK</button>
@@ -312,7 +311,7 @@ export default function LandingPage() {
           </p>
           <div className="flex gap-4 text-sm text-[var(--text-secondary)]">
             <a href="#" className="hover:text-[var(--text-primary)] transition-colors">Confidentialité</a>
-            <a href="#" className="hover:text-[var(--text-primary)] transition-colors">Conditions d'utilisation</a>
+            <a href="#" className="hover:text-[var(--text-primary)] transition-colors">Conditions d&apos;utilisation</a>
             <a href="#" className="hover:text-[var(--text-primary)] transition-colors">Mentions légales</a>
           </div>
         </div>

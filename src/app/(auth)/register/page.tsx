@@ -86,7 +86,7 @@ export default function RegisterPage() {
           <img src="/images/logo.png" alt="EduAI Logo" className="h-14 w-14 rounded-2xl object-cover shadow-lg shadow-[#6C63FF]/30 border border-[#1E1E2E]" />
           <div className="text-center">
             <h1 className="text-2xl font-bold text-[#F0F0F8]">EduAI Africa</h1>
-            <p className="text-sm text-[#8888AA]">Rejoignez des milliers d'étudiants</p>
+            <p className="text-sm text-[#8888AA]">Rejoignez des milliers d&apos;étudiants</p>
           </div>
         </motion.div>
 
@@ -100,7 +100,7 @@ export default function RegisterPage() {
           <div className="mb-6">
             <h2 className="text-xl font-bold text-[#F0F0F8]">Créer un compte</h2>
             <p className="mt-1 text-sm text-[#8888AA]">
-              Commencez votre aventure pédagogique avec l'IA.
+              Commencez votre aventure pédagogique avec l&apos;IA.
             </p>
           </div>
 

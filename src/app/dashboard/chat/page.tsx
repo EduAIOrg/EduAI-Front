@@ -102,7 +102,7 @@ export default function ChatPage() {
               whileTap={{ scale: 0.97 }}
             >
               <Trash2 className="h-3.5 w-3.5" />
-              Effacer l'historique
+              Effacer l&apos;historique
             </motion.button>
           </div>
         )}

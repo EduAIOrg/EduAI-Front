@@ -65,7 +65,7 @@ export default function LoginPage() {
           <img src="/images/logo.png" alt="EduAI Logo" className="h-14 w-14 rounded-2xl object-cover shadow-lg shadow-[#6C63FF]/30 border border-[#1E1E2E]" />
           <div className="text-center">
             <h1 className="text-2xl font-bold text-[#F0F0F8]">EduAI Africa</h1>
-            <p className="text-sm text-[#8888AA]">L'apprentissage intelligent pour tous</p>
+            <p className="text-sm text-[#8888AA]">L&apos;apprentissage intelligent pour tous</p>
           </div>
         </motion.div>
 

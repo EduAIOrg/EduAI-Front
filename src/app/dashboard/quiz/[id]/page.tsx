@@ -73,7 +73,8 @@ export default function QuizViewPage({ params }: { params: Promise<{ id: string 
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [feedbacks, setFeedbacks] = useState<Record<string, { isCorrect: boolean; explanation: string }>>({});
   const [isFinished, setIsFinished] = useState(false);
-  const [startTime] = useState(Date.now());
+  const [startTime] = useState(() => Date.now());
+  const [endTime, setEndTime] = useState<number | null>(null);
 
   const { data: quizData, isLoading } = useQuizById(id);
   const { submitQuiz, isSubmitting } = useQuiz();
@@ -104,6 +105,7 @@ const currentQuestion = questions[currentIndex];
     if (currentIndex < questions.length - 1) {
       setCurrentIndex((i) => i + 1);
     } else {
+      setEndTime(Date.now());
       setIsFinished(true);
     }
   };
@@ -112,6 +114,7 @@ const currentQuestion = questions[currentIndex];
     setCurrentIndex(0);
     setAnswers({});
     setFeedbacks({});
+    setEndTime(null);
     setIsFinished(false);
   };
 
@@ -126,7 +129,7 @@ const currentQuestion = questions[currentIndex];
   /** Calcule le score final */
   const correctCount = Object.values(feedbacks).filter((f) => f.isCorrect).length;
   const score = Math.round((correctCount / questions.length) * 100);
-  const duration = Math.round((Date.now() - startTime) / 1000);
+  const duration = endTime ? Math.round((endTime - startTime) / 1000) : 0;
 
   const result = {
     quizId: quiz.id,
