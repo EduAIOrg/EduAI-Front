@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { Mic, MicOff, Volume2, VolumeX, Sparkles } from 'lucide-react';
 import { useVoice, VoiceState } from '@/hooks/useVoice';
+import { speechService } from '@/lib/speech';
 
 /**
  * Assistant vocal avec cercle animé réactif et transcription en temps réel.
@@ -135,7 +136,24 @@ const VoiceAssistant = () => {
               </motion.button>
             )}
           </div>
-          <p className="text-sm text-[#F0F0F8]/90">{aiResponse}</p>
+          <p className="text-sm text-[#F0F0F8]/90 mb-4">{aiResponse}</p>
+          <div className="flex gap-2 justify-end">
+            {voiceState !== 'speaking' ? (
+              <button
+                onClick={() => speechService.speak(aiResponse, "fr-FR")}
+                className="flex items-center gap-1.5 rounded-lg bg-[#6C63FF]/20 px-3 py-1.5 text-xs font-medium text-[#6C63FF] hover:bg-[#6C63FF]/30 transition-colors"
+              >
+                🔊 Lire la réponse
+              </button>
+            ) : (
+              <button
+                onClick={() => speechService.stop()}
+                className="flex items-center gap-1.5 rounded-lg bg-[#FF5470]/20 px-3 py-1.5 text-xs font-medium text-[#FF5470] hover:bg-[#FF5470]/30 transition-colors"
+              >
+                ⏹ Arrêter
+              </button>
+            )}
+          </div>
         </motion.div>
       )}
 

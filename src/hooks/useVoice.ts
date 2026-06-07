@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useChat } from './useChat';
 import api from '@/lib/api';
+import { speechService } from '@/lib/speech';
 
 export type VoiceState = 'idle' | 'listening' | 'processing' | 'speaking';
 
@@ -34,52 +35,24 @@ export const useVoice = () => {
     });
   }, []);
 
-  /** Synthèse vocale via le backend, fallback sur Web Speech API */
-  const speak = useCallback(async (text: string) => {
-    setVoiceState('speaking');
-    try {
-      const baseURL = (api.defaults.baseURL || '').replace(/\/$/, '');
-      const token = typeof window !== 'undefined' ? localStorage.getItem('eduai_token') : null;
-      const response = await fetch(`${baseURL}/api/voice/synthesize`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ text, lang: 'fr' }),
+  useEffect(() => {
+    const unsubscribe = speechService.subscribe((state) => {
+      setVoiceState((prev) => {
+        if (state === 'speaking') {
+          return 'speaking';
+        }
+        if (state === 'idle' && prev === 'speaking') {
+          return 'idle';
+        }
+        return prev;
       });
+    });
+    return unsubscribe;
+  }, []);
 
-      if (response.ok) {
-        const audioBlob = await response.blob();
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
-        audio.onended = () => {
-          setVoiceState('idle');
-          URL.revokeObjectURL(audioUrl);
-        };
-        audio.onerror = () => {
-          setVoiceState('idle');
-          URL.revokeObjectURL(audioUrl);
-        };
-        await audio.play();
-        return;
-      }
-    } catch {
-      // Fallback
-    }
-
-    // Fallback: Web Speech API
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'fr-FR';
-      utterance.rate = 1;
-      utterance.onstart = () => setVoiceState('speaking');
-      utterance.onend = () => setVoiceState('idle');
-      window.speechSynthesis.speak(utterance);
-    } else {
-      setVoiceState('idle');
-    }
+  /** Synthèse vocale via la Web Speech API du navigateur */
+  const speak = useCallback((text: string) => {
+    speechService.speak(text, 'fr-FR');
   }, []);
 
   /** Envoie la requête vocale au chat IA */
@@ -195,8 +168,7 @@ export const useVoice = () => {
   }, []);
 
   const stopSpeaking = useCallback(() => {
-    window.speechSynthesis?.cancel();
-    setVoiceState('idle');
+    speechService.stop();
   }, []);
 
   const toggleListening = useCallback(() => {
