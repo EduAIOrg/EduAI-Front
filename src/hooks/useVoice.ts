@@ -147,6 +147,16 @@ export const useVoice = () => {
       mediaRecorder.onstop = async () => {
         stream.getTracks().forEach(t => t.stop());
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        
+        console.log("Audio Blob type:", audioBlob.type);
+        console.log("Audio Blob size:", audioBlob.size);
+        
+        if (!audioBlob || audioBlob.size === 0) {
+          console.warn("Recorded audio blob is empty, ignoring transcription request.");
+          setVoiceState('idle');
+          return;
+        }
+        
         await transcribeAudio(audioBlob);
       };
 
