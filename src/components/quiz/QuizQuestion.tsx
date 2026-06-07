@@ -26,8 +26,8 @@ const QuizQuestion = ({
   isSubmitting,
   feedback,
 }: QuizQuestionProps) => {
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [openAnswer, setOpenAnswer] = useState('');
+  const [selectedOption, setSelectedOption] = useState<string | null>(question.userAnswer || null);
+  const [openAnswer, setOpenAnswer] = useState(question.userAnswer || '');
 
   const handleSubmitMCQ = (optionId: string) => {
     if (feedback || isSubmitting) return;

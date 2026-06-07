@@ -122,7 +122,7 @@ export const useChat = () => {
       try {
         // Utilise fetch pour le SSE streaming (axios ne supporte pas bien SSE)
         const token = typeof window !== 'undefined' ? localStorage.getItem('eduai_token') : null;
-        const baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://eduai-back.onrender.com';
+        const baseURL = (api.defaults.baseURL || '').replace(/\/$/, '');
         
         const response = await fetch(`${baseURL}/api/chat/conversations/${conversationId}/messages`, {
           method: 'POST',

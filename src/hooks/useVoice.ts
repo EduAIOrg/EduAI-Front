@@ -38,8 +38,8 @@ export const useVoice = () => {
   const speak = useCallback(async (text: string) => {
     setVoiceState('speaking');
     try {
-      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://eduai-back.onrender.com';
-      const token = localStorage.getItem('eduai_token');
+      const baseURL = (api.defaults.baseURL || '').replace(/\/$/, '');
+      const token = typeof window !== 'undefined' ? localStorage.getItem('eduai_token') : null;
       const response = await fetch(`${baseURL}/api/voice/synthesize`, {
         method: 'POST',
         headers: {
