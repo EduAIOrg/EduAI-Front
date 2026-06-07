@@ -9,18 +9,15 @@ import { useAuthStore } from '@/store/authStore';
 import { useThemeStore } from '@/store/themeStore';
 import ThemeToggle from '@/components/shared/ThemeToggle';
 import { ROUTES } from '@/constants/routes';
+import NotificationBell from '@/components/layout/notifications/NotificationBell';
+import UserProfileMenu from '@/components/layout/UserProfileMenu';
 
 export default function LandingPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
   const { theme } = useThemeStore();
 
-  // Redirect authenticated users to dashboard
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push('/dashboard');
-    }
-  }, [isAuthenticated, router]);
+
 
   const ctaLink = isAuthenticated ? ROUTES.DASHBOARD : ROUTES.LOGIN;
   const ctaText = isAuthenticated ? 'Accéder au Dashboard' : 'Commencer gratuitement';
@@ -57,14 +54,29 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-4">
             {/* <ThemeToggle /> */}
-            <Link href={ctaLink}>
-              <motion.button
-                className="hidden md:flex items-center gap-2 rounded-xl bg-[var(--text-primary)] px-5 py-2.5 text-sm font-medium text-[var(--bg-base)] transition-transform hover:scale-105"
-                whileTap={{ scale: 0.95 }}
-              >
-                {isAuthenticated ? 'Dashboard' : 'Connexion'}
-              </motion.button>
-            </Link>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-4">
+                <Link href={ROUTES.DASHBOARD}>
+                  <motion.button
+                    className="hidden md:flex items-center gap-2 rounded-xl bg-[var(--text-primary)] px-5 py-2.5 text-sm font-medium text-[var(--bg-base)] transition-transform hover:scale-105"
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Dashboard
+                  </motion.button>
+                </Link>
+                <NotificationBell />
+                <UserProfileMenu />
+              </div>
+            ) : (
+              <Link href={ROUTES.LOGIN}>
+                <motion.button
+                  className="hidden md:flex items-center gap-2 rounded-xl bg-[var(--text-primary)] px-5 py-2.5 text-sm font-medium text-[var(--bg-base)] transition-transform hover:scale-105"
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Connexion
+                </motion.button>
+              </Link>
+            )}
           </div>
         </div>
       </header>

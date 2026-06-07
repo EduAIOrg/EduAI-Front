@@ -14,6 +14,8 @@ export const ROUTES = {
   TRANSLATE: '/dashboard/translate',
   VOICE: '/dashboard/voice',
   PROGRESS: '/dashboard/progress',
+  PRICING: '/pricing',
+  BILLING: '/dashboard/billing',
 } as const;
 
 /** Éléments de la navigation sidebar */

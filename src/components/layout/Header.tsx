@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Bell, ChevronRight, X } from 'lucide-react';
+import { Search, ChevronRight, X } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
-import { getInitials } from '@/lib/utils';
 import MobileNav from './MobileNav';
+import NotificationBell from './notifications/NotificationBell';
+import UserProfileMenu from './UserProfileMenu';
 
 /** Map de noms de pages pour le breadcrumb */
 const pageNames: Record<string, string> = {
@@ -26,7 +27,6 @@ const Header = () => {
   const pathname = usePathname();
   const { user } = useAuthStore();
   const [showSearch, setShowSearch] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
 
   /** Génère le breadcrumb à partir du pathname */
   const breadcrumbs = pathname
@@ -107,50 +107,10 @@ const Header = () => {
         </motion.button>
 
         {/* Notifications */}
-        <div className="relative">
-          <motion.button
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="relative rounded-xl p-2.5 text-[#8888AA] transition-colors hover:bg-[#13131A] hover:text-[#F0F0F8]"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            aria-label="Notifications"
-          >
-            <Bell className="h-5 w-5" />
-            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#FF5470]" />
-          </motion.button>
+        <NotificationBell />
 
-          <AnimatePresence>
-            {showNotifications && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute right-0 top-full mt-2 w-72 rounded-2xl border border-[#1E1E2E] bg-[#13131A] p-4 shadow-2xl"
-              >
-                <h3 className="mb-3 text-sm font-semibold text-[#F0F0F8]">Notifications</h3>
-                <div className="space-y-2">
-                  <div className="rounded-xl bg-[#0A0A0F] p-3">
-                    <p className="text-xs text-[#F0F0F8]">Votre résumé est prêt !</p>
-                    <p className="mt-1 text-[10px] text-[#8888AA]">Il y a 5 min</p>
-                  </div>
-                  <div className="rounded-xl bg-[#0A0A0F] p-3">
-                    <p className="text-xs text-[#F0F0F8]">Quiz &quot;Algorithmes&quot; terminé</p>
-                    <p className="mt-1 text-[10px] text-[#8888AA]">Il y a 1h</p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Avatar */}
-        <motion.div
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#6C63FF] to-[#00D4AA] text-xs font-bold text-white cursor-pointer"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          {user ? getInitials(user.full_name) : 'U'}
-        </motion.div>
+        {/* Profile menu */}
+        <UserProfileMenu />
       </div>
     </header>
   );
