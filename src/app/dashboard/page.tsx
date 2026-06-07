@@ -50,7 +50,7 @@ export default function DashboardPage() {
   const avgScore = totalQuizzes > 0
     ? Math.round(completedQuizzes.reduce((acc, q) => acc + (q.last_score || 0), 0) / totalQuizzes)
     : 0;
-  
+
   // Streak based on items count
   const streak = totalDocs > 0 ? `${Math.min(totalDocs + totalQuizzes, 5)} jours 🔥` : '0 jours ❄️';
 
@@ -136,7 +136,6 @@ export default function DashboardPage() {
         <h1 className="text-3xl font-bold text-[#F0F0F8]">
           {greeting},{' '}
           <span className="gradient-text">{user?.full_name?.split(' ')[0] || 'Étudiant'}</span>{' '}
-          👋
         </h1>
         <p className="mt-1 text-sm text-[#8888AA]">
           Continuez votre apprentissage là où vous vous êtes arrêté.
