@@ -27,4 +27,5 @@ export const NAV_ITEMS = [
   { label: 'Traduction', href: ROUTES.TRANSLATE, icon: 'Languages', badge: 'Pro' },
   { label: 'Mode Vocal', href: ROUTES.VOICE, icon: 'Mic', badge: 'Pro' },
   { label: 'Mes Progrès', href: ROUTES.PROGRESS, icon: 'TrendingUp' },
+  { label: 'Facturation', href: ROUTES.BILLING, icon: 'CreditCard' },
 ] as const;

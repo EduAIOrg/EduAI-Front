@@ -175,7 +175,7 @@ export default function PricingPage() {
                   
                   <div className="flex items-baseline gap-1.5 mb-8">
                     <span className="text-4xl font-extrabold text-white">
-                      {plan.price === 0.0 ? '0' : plan.price.toFixed(2)}
+                      {plan.price === 0.0 ? '0' : plan.price.toLocaleString('fr-FR')}
                     </span>
                     <span className="text-lg font-semibold text-[#8888AA]">
                       {plan.currency}

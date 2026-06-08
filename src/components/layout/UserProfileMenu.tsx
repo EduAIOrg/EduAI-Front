@@ -115,7 +115,7 @@ export default function UserProfileMenu() {
             {/* Menu Links */}
             <button
               onClick={() => {
-                toast.info('Fonctionnalité "Mon profil" bientôt disponible !');
+                router.push('/dashboard/profile');
                 setIsOpen(false);
               }}
               className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs text-[#8888AA] hover:text-[#F0F0F8] hover:bg-[#1E1E2E] transition-colors text-left"
@@ -127,7 +127,7 @@ export default function UserProfileMenu() {
 
             <button
               onClick={() => {
-                toast.info('Fonctionnalité "Paramètres du compte" bientôt disponible !');
+                router.push('/dashboard/settings');
                 setIsOpen(false);
               }}
               className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs text-[#8888AA] hover:text-[#F0F0F8] hover:bg-[#1E1E2E] transition-colors text-left"
@@ -151,7 +151,7 @@ export default function UserProfileMenu() {
 
             <button
               onClick={() => {
-                toast.info('Fonctionnalité "Historique" bientôt disponible !');
+                router.push('/dashboard/history');
                 setIsOpen(false);
               }}
               className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs text-[#8888AA] hover:text-[#F0F0F8] hover:bg-[#1E1E2E] transition-colors text-left"

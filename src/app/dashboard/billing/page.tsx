@@ -150,7 +150,7 @@ export default function BillingPage() {
                 <div className="text-xs">
                   <p className="text-[#8888AA]">Montant de la formule</p>
                   <p className="font-semibold text-[#F0F0F8] mt-0.5">
-                    {planPrice === 0.0 ? 'Gratuit' : `${planPrice.toFixed(2)} ${planCurrency} / mois`}
+                    {planPrice === 0.0 ? 'Gratuit' : `${planPrice.toLocaleString('fr-FR')} ${planCurrency} / mois`}
                   </p>
                 </div>
               </div>
@@ -314,7 +314,7 @@ export default function BillingPage() {
                     <td className="px-6 py-4 font-mono text-[#F0F0F8]">{payment.provider_transaction_id || payment.id.substr(0, 12)}</td>
                     <td className="px-6 py-4 uppercase font-semibold">{payment.provider}</td>
                     <td className="px-6 py-4 text-white font-medium">
-                      {payment.amount.toFixed(2)} {payment.currency}
+                      {payment.amount.toLocaleString('fr-FR')} {payment.currency}
                     </td>
                     <td className="px-6 py-4">
                       <span

@@ -198,22 +198,25 @@ export default function LandingPage() {
             <p className="mt-4 text-[var(--text-secondary)]">Commencez gratuitement, passez à la vitesse supérieure quand vous le souhaitez.</p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-2 max-w-4xl mx-auto">
-            <div className="rounded-3xl border border-[var(--bg-border)] bg-[var(--bg-surface)] p-8 shadow-lg">
-              <h3 className="text-2xl font-bold">Découverte</h3>
-              <p className="mt-2 text-[var(--text-secondary)]">Pour tester l&apos;IA pédagogique.</p>
-              <div className="my-6">
-                <span className="text-4xl font-extrabold">0 FCFA</span>
-                <span className="text-[var(--text-secondary)]"> / mois</span>
+          <div className="grid gap-8 md:grid-cols-3 max-w-6xl mx-auto">
+            {/* Free Plan */}
+            <div className="rounded-3xl border border-[var(--bg-border)] bg-[var(--bg-surface)] p-8 shadow-lg flex flex-col justify-between">
+              <div>
+                <h3 className="text-2xl font-bold">Free</h3>
+                <p className="mt-2 text-[var(--text-secondary)]">Pour tester l&apos;IA pédagogique.</p>
+                <div className="my-6">
+                  <span className="text-4xl font-extrabold">0 FCFA</span>
+                  <span className="text-[var(--text-secondary)]"> / mois</span>
+                </div>
+                <ul className="space-y-4 mb-8">
+                  {['3 Transcriptions audio / jour', '5 Résumés de cours / jour', '5 Analyses de documents / jour', '10 Messages Chat RAG / jour'].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3">
+                      <CheckCircle className="h-5 w-5 text-[var(--accent)] shrink-0" />
+                      <span className="text-sm">{item}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <ul className="space-y-4 mb-8">
-                {['Analyse de 3 PDF par mois', '10 Quiz générés', 'Traduction basique', 'Support communautaire'].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-[var(--accent)]" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
               <Link href={ROUTES.REGISTER}>
                 <button className="w-full rounded-xl border border-[var(--bg-border)] py-3 font-semibold transition-colors hover:bg-[var(--bg-border)]">
                   Commencer
@@ -222,27 +225,54 @@ export default function LandingPage() {
             </div>
 
             {/* Pro Plan */}
-            <div className="relative rounded-3xl border-2 border-[var(--primary)] bg-[var(--bg-surface)] p-8 shadow-2xl shadow-[var(--primary)]/10">
+            <div className="relative rounded-3xl border-2 border-[var(--primary)] bg-[var(--bg-surface)] p-8 shadow-2xl shadow-[var(--primary)]/10 flex flex-col justify-between">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-[var(--primary)] px-4 py-1 text-xs font-bold text-white uppercase tracking-wider">
                 Le plus populaire
               </div>
-              <h3 className="text-2xl font-bold">Excellence</h3>
-              <p className="mt-2 text-[var(--text-secondary)]">Pour les étudiants exigeants.</p>
-              <div className="my-6">
-                <span className="text-4xl font-extrabold">2500 FCFA</span>
-                <span className="text-[var(--text-secondary)]"> / mois</span>
+              <div>
+                <h3 className="text-2xl font-bold">Pro</h3>
+                <p className="mt-2 text-[var(--text-secondary)]">Pour booster vos études au quotidien.</p>
+                <div className="my-6">
+                  <span className="text-4xl font-extrabold">6 500 FCFA</span>
+                  <span className="text-[var(--text-secondary)]"> / mois</span>
+                </div>
+                <ul className="space-y-4 mb-8">
+                  {['100 Transcriptions audio / jour', '100 Résumés de cours / jour', '100 Analyses de documents / jour', '100 Messages Chat RAG / jour', 'Générateur de Quiz inclus'].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3">
+                      <CheckCircle className="h-5 w-5 text-[var(--primary)] shrink-0" />
+                      <span className="text-sm">{item}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <ul className="space-y-4 mb-8">
-                {['Documents PDF illimités', 'Quiz illimités + corrections détaillées', 'Traduction avec contexte', 'Assistant Vocal IA', 'Statistiques de progression'].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-[var(--primary)]" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link href={ROUTES.REGISTER}>
+              <Link href={ROUTES.PRICING}>
                 <button className="w-full rounded-xl bg-[var(--primary)] py-3 font-semibold text-white transition-transform hover:scale-[1.02]">
                   Devenir Premium
+                </button>
+              </Link>
+            </div>
+
+            {/* Enterprise Plan */}
+            <div className="rounded-3xl border border-[var(--bg-border)] bg-[var(--bg-surface)] p-8 shadow-lg flex flex-col justify-between">
+              <div>
+                <h3 className="text-2xl font-bold">Enterprise</h3>
+                <p className="mt-2 text-[var(--text-secondary)]">Pour les écoles et groupes d&apos;étude.</p>
+                <div className="my-6">
+                  <span className="text-4xl font-extrabold">65 000 FCFA</span>
+                  <span className="text-[var(--text-secondary)]"> / mois</span>
+                </div>
+                <ul className="space-y-4 mb-8">
+                  {['Quotas personnalisés', 'Gestion multi-utilisateurs', 'Support technique prioritaire 24/7', 'Analyses de documents illimitées'].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3">
+                      <CheckCircle className="h-5 w-5 text-[var(--accent)] shrink-0" />
+                      <span className="text-sm">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <Link href={ROUTES.PRICING}>
+                <button className="w-full rounded-xl border border-[var(--bg-border)] py-3 font-semibold transition-colors hover:bg-[var(--bg-border)]">
+                  Découvrir
                 </button>
               </Link>
             </div>

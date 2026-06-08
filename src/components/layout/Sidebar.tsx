@@ -13,6 +13,7 @@ import {
   TrendingUp,
   LogOut,
   Sparkles,
+  CreditCard,
 } from 'lucide-react';
 import { NAV_ITEMS } from '@/constants/routes';
 import { useAuthStore } from '@/store/authStore';
@@ -28,6 +29,7 @@ const iconMap: Record<string, React.ElementType> = {
   Languages,
   Mic,
   TrendingUp,
+  CreditCard,
 };
 
 /**
